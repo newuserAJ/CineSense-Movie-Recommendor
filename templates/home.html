@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Recommender System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #000000;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+            background: #1a1a1a;
+            border-radius: 8px;
+            padding: 40px;
+            box-shadow: 0 8px 32px rgba(255, 255, 255, 0.05);
+        }
+
+        h1 {
+            text-align: center;
+            color: #ffffff;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #888888;
+            margin-bottom: 40px;
+            font-size: 1.1em;
+        }
+
+        /* Tab Navigation */
+        .tab-navigation {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 40px;
+            border-bottom: 2px solid #333333;
+        }
+
+        .tab-button {
+            padding: 12px 30px;
+            background: transparent;
+            color: #888888;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .tab-button:hover {
+            color: #ffffff;
+        }
+
+        .tab-button.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .search-container {
+            position: relative;
+            margin-bottom: 30px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 16px 24px;
+            font-size: 16px;
+            border: 2px solid #333333;
+            border-radius: 8px;
+            outline: none;
+            transition: all 0.3s;
+            font-family: 'Poppins', sans-serif;
+            background: #0a0a0a;
+            color: #ffffff;
+        }
+
+        input[type="text"]:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        input[type="text"]::placeholder {
+            color: #666666;
+        }
+
+        .button-container {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        button {
+            padding: 16px 40px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 600;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: #2a2a2a;
+            color: #ffffff;
+            border: 1px solid #333333;
+        }
+
+        .btn-secondary:hover {
+            background: #333333;
+        }
+
+        /* Actor Selection */
+        .actor-selection {
+            display: none;
+            margin-top: 30px;
+        }
+
+        .actor-selection.active {
+            display: block;
+        }
+
+        .actor-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .actor-card {
+            background: #0a0a0a;
+            border: 2px solid #222222;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .actor-card:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+        }
+
+        .actor-card.selected {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .actor-profile {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin: 0 auto 10px;
+            display: block;
+        }
+
+        .actor-profile-placeholder {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 10px;
+            font-size: 40px;
+            color: white;
+        }
+
+        .actor-name {
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .actor-department {
+            color: #888888;
+            font-size: 12px;
+        }
+
+        /* Actor Details Banner */
+        .actor-details-banner {
+            display: none;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 8px;
+            padding: 30px;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        .actor-details-banner.active {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .actor-banner-image {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid white;
+        }
+
+        .actor-banner-info h2 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .actor-banner-info p {
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+
+        .actor-stats {
+            display: flex;
+            gap: 20px;
+            margin-top: 15px;
+        }
+
+        .stat-item {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 10px 20px;
+            border-radius: 6px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .stat-value {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        /* Movies Grid */
+        .movies-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 24px;
+            margin-top: 40px;
+        }
+
+        .movie-card {
+            background: #0a0a0a;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #222222;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .movie-card:hover {
+            transform: translateY(-4px);
+            border-color: #667eea;
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.2);
+        }
+
+        .movie-poster {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            background: #1a1a1a;
+            display: block;
+        }
+
+        .movie-poster-placeholder {
+            width: 100%;
+            height: 300px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 64px;
+        }
+
+        .movie-info {
+            padding: 16px;
+        }
+
+        .movie-card h3 {
+            font-size: 15px;
+            color: #ffffff;
+            font-weight: 600;
+            line-height: 1.4;
+            margin: 0 0 8px 0;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            min-height: 42px;
+        }
+
+        .movie-character {
+            font-size: 13px;
+            color: #667eea;
+            margin-bottom: 8px;
+            font-style: italic;
+        }
+
+        .movie-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 8px;
+        }
+
+        .movie-year {
+            font-size: 13px;
+            color: #888888;
+        }
+
+        .movie-rating {
+            font-size: 13px;
+            color: #ffd700;
+            font-weight: 600;
+        }
+
+        .loader {
+            display: none;
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        .loader.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid #1a1a1a;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loader p {
+            margin-top: 15px;
+            color: #888888;
+        }
+
+        .error-message {
+            display: none;
+            background: #ff4444;
+            color: white;
+            padding: 16px;
+            border-radius: 8px;
+            margin-top: 20px;
+            text-align: center;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .error-message.active {
+            display: block;
+        }
+
+        .autocomplete-items {
+            position: absolute;
+            border: 1px solid #333333;
+            border-bottom: none;
+            border-top: none;
+            z-index: 99;
+            top: 100%;
+            left: 0;
+            right: 0;
+            max-height: 300px;
+            overflow-y: auto;
+            background: #0a0a0a;
+            border-radius: 0 0 8px 8px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+            margin-top: -2px;
+        }
+
+        .autocomplete-items div {
+            padding: 12px 24px;
+            cursor: pointer;
+            background-color: #0a0a0a;
+            border-bottom: 1px solid #222222;
+            color: #ffffff;
+        }
+
+        .autocomplete-items div:hover {
+            background-color: #1a1a1a;
+        }
+
+        .autocomplete-active {
+            background-color: #667eea !important;
+            color: #ffffff;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #666666;
+            margin-top: 60px;
+            font-size: 18px;
+        }
+
+        .section-title {
+            color: #ffffff;
+            font-size: 1.5em;
+            margin: 30px 0 20px 0;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .actor-details-banner.active {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .actor-stats {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎬 Movie Recommender</h1>
+        <p class="subtitle">Discover your next favorite movie</p>
+
+        <!-- Tab Navigation -->
+        <div class="tab-navigation">
+            <button class="tab-button active" onclick="switchTab('movies')">
+                🎬 By Movie
+            </button>
+            <button class="tab-button" onclick="switchTab('actors')">
+                ⭐ By Actor
+            </button>
+        </div>
+
+        <!-- Movies Tab -->
+        <div id="movies-tab" class="tab-content active">
+            <div class="search-container">
+                <input type="text" 
+                       id="autoComplete" 
+                       placeholder="Search for a movie..." 
+                       autocomplete="off">
+            </div>
+
+            <div class="button-container">
+                <button class="btn-primary" onclick="recommendMovies()">Get Recommendations</button>
+                <button class="btn-secondary" onclick="clearResults()">Clear</button>
+            </div>
+
+            <div class="loader" id="movieLoader">
+                <div class="spinner"></div>
+                <p>Finding similar movies...</p>
+            </div>
+
+            <div class="error-message" id="movieError"></div>
+
+            <div class="movies-grid" id="similarMovies"></div>
+        </div>
+
+        <!-- Actors Tab -->
+        <div id="actors-tab" class="tab-content">
+            <div class="search-container">
+                <input type="text" 
+                       id="actorSearch" 
+                       placeholder="Search for an actor..." 
+                       autocomplete="off">
+            </div>
+
+            <div class="button-container">
+                <button class="btn-primary" onclick="searchActor()">Search Actor</button>
+                <button class="btn-secondary" onclick="clearActorResults()">Clear</button>
+            </div>
+
+            <div class="loader" id="actorLoader">
+                <div class="spinner"></div>
+                <p>Searching for actor...</p>
+            </div>
+
+            <div class="error-message" id="actorError"></div>
+
+            <!-- Actor Selection -->
+            <div class="actor-selection" id="actorSelection">
+                <h2 class="section-title">Select an actor:</h2>
+                <div class="actor-cards" id="actorCards"></div>
+            </div>
+
+            <!-- Actor Details Banner -->
+            <div class="actor-details-banner" id="actorBanner">
+                <img id="actorBannerImage" class="actor-banner-image" src="" alt="Actor">
+                <div class="actor-banner-info">
+                    <h2 id="actorBannerName"></h2>
+                    <p id="actorBannerBio"></p>
+                    <div class="actor-stats">
+                        <div class="stat-item">
+                            <div class="stat-label">Born</div>
+                            <div class="stat-value" id="actorBirthday"></div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Birthplace</div>
+                            <div class="stat-value" id="actorBirthplace"></div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Known For</div>
+                            <div class="stat-value" id="actorKnownFor"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="movies-grid" id="actorMovies"></div>
+        </div>
+    </div>
+
+    <script>
+        // Movie suggestions from backend
+        const suggestions = {{ suggestions | tojson }};
+        let currentFocus = -1;
+        let selectedActorId = null;
+
+        // Tab Switching
+        function switchTab(tab) {
+            const tabs = ['movies', 'actors'];
+            tabs.forEach(t => {
+                document.getElementById(`${t}-tab`).classList.remove('active');
+                document.querySelector(`[onclick="switchTab('${t}')"]`).classList.remove('active');
+            });
+            
+            document.getElementById(`${tab}-tab`).classList.add('active');
+            document.querySelector(`[onclick="switchTab('${tab}')"]`).classList.add('active');
+            
+            // Clear results when switching tabs
+            if (tab === 'movies') {
+                clearActorResults();
+            } else {
+                clearResults();
+            }
+        }
+
+        // Movie Autocomplete
+        const input = document.getElementById('autoComplete');
+        
+        input.addEventListener('input', function(e) {
+            const val = this.value;
+            closeAllLists();
+            if (!val) return false;
+            currentFocus = -1;
+            
+            const list = document.createElement('div');
+            list.setAttribute('id', 'autocomplete-list');
+            list.setAttribute('class', 'autocomplete-items');
+            this.parentNode.appendChild(list);
+            
+            let count = 0;
+            for (let i = 0; i < suggestions.length && count < 10; i++) {
+                if (suggestions[i].toLowerCase().includes(val.toLowerCase())) {
+                    const item = document.createElement('div');
+                    const index = suggestions[i].toLowerCase().indexOf(val.toLowerCase());
+                    item.innerHTML = suggestions[i].substr(0, index);
+                    item.innerHTML += '<strong>' + suggestions[i].substr(index, val.length) + '</strong>';
+                    item.innerHTML += suggestions[i].substr(index + val.length);
+                    item.innerHTML += '<input type="hidden" value="' + suggestions[i] + '">';
+                    
+                    item.addEventListener('click', function(e) {
+                        input.value = this.getElementsByTagName('input')[0].value;
+                        closeAllLists();
+                    });
+                    list.appendChild(item);
+                    count++;
+                }
+            }
+        });
+
+        input.addEventListener('keydown', function(e) {
+            let x = document.getElementById('autocomplete-list');
+            if (x) x = x.getElementsByTagName('div');
+            if (e.keyCode == 40) {
+                currentFocus++;
+                addActive(x);
+            } else if (e.keyCode == 38) {
+                currentFocus--;
+                addActive(x);
+            } else if (e.keyCode == 13) {
+                e.preventDefault();
+                if (currentFocus > -1) {
+                    if (x) x[currentFocus].click();
+                } else {
+                    recommendMovies();
+                }
+            }
+        });
+
+        // Actor search enter key
+        document.getElementById('actorSearch').addEventListener('keydown', function(e) {
+            if (e.keyCode == 13) {
+                e.preventDefault();
+                searchActor();
+            }
+        });
+
+        function addActive(x) {
+            if (!x) return false;
+            removeActive(x);
+            if (currentFocus >= x.length) currentFocus = 0;
+            if (currentFocus < 0) currentFocus = (x.length - 1);
+            x[currentFocus].classList.add('autocomplete-active');
+        }
+
+        function removeActive(x) {
+            for (let i = 0; i < x.length; i++) {
+                x[i].classList.remove('autocomplete-active');
+            }
+        }
+
+        function closeAllLists(elmnt) {
+            const x = document.getElementsByClassName('autocomplete-items');
+            for (let i = 0; i < x.length; i++) {
+                if (elmnt != x[i] && elmnt != input) {
+                    x[i].parentNode.removeChild(x[i]);
+                }
+            }
+        }
+
+        document.addEventListener('click', function(e) {
+            closeAllLists(e.target);
+        });
+
+        // Movie Recommendations
+        async function recommendMovies() {
+            const movieName = document.getElementById('autoComplete').value;
+            
+            if (!movieName) {
+                showError('movieError', 'Please enter a movie name!');
+                return;
+            }
+
+            const loader = document.getElementById('movieLoader');
+            const errorMsg = document.getElementById('movieError');
+            const resultsDiv = document.getElementById('similarMovies');
+            
+            loader.classList.add('active');
+            errorMsg.classList.remove('active');
+            resultsDiv.innerHTML = '';
+
+            try {
+                const formData = new FormData();
+                formData.append('name', movieName.toLowerCase());
+
+                const response = await fetch('/similarity', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+                loader.classList.remove('active');
+
+                if (data.error) {
+                    showError('movieError', data.error);
+                } else {
+                    displayMovies(data, 'similarMovies');
+                }
+            } catch (error) {
+                loader.classList.remove('active');
+                showError('movieError', 'An error occurred. Please try again.');
+                console.error('Error:', error);
+            }
+        }
+
+        // Actor Search
+        async function searchActor() {
+            const actorName = document.getElementById('actorSearch').value;
+            
+            if (!actorName) {
+                showError('actorError', 'Please enter an actor name!');
+                return;
+            }
+
+            const loader = document.getElementById('actorLoader');
+            const errorMsg = document.getElementById('actorError');
+            const actorSelection = document.getElementById('actorSelection');
+            const actorCards = document.getElementById('actorCards');
+            const actorMovies = document.getElementById('actorMovies');
+            const actorBanner = document.getElementById('actorBanner');
+            
+            loader.classList.add('active');
+            errorMsg.classList.remove('active');
+            actorSelection.classList.remove('active');
+            actorCards.innerHTML = '';
+            actorMovies.innerHTML = '';
+            actorBanner.classList.remove('active');
+
+            try {
+                const formData = new FormData();
+                formData.append('name', actorName);
+
+                const response = await fetch('/search_actor', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+                loader.classList.remove('active');
+
+                if (data.error) {
+                    showError('actorError', data.error);
+                } else {
+                    displayActorSelection(data);
+                }
+            } catch (error) {
+                loader.classList.remove('active');
+                showError('actorError', 'An error occurred. Please try again.');
+                console.error('Error:', error);
+            }
+        }
+
+        // Display Actor Selection
+        function displayActorSelection(actors) {
+            const actorSelection = document.getElementById('actorSelection');
+            const actorCards = document.getElementById('actorCards');
+            
+            actorSelection.classList.add('active');
+            actorCards.innerHTML = '';
+
+            actors.forEach(actor => {
+                const card = document.createElement('div');
+                card.className = 'actor-card';
+                card.onclick = () => selectActor(actor.id);
+                
+                const profileHtml = actor.profile_path 
+                    ? `<img src="${actor.profile_path}" alt="${actor.name}" class="actor-profile">`
+                    : `<div class="actor-profile-placeholder">👤</div>`;
+                
+                card.innerHTML = `
+                    ${profileHtml}
+                    <div class="actor-name">${actor.name}</div>
+                    <div class="actor-department">${actor.known_for_department}</div>
+                `;
+                actorCards.appendChild(card);
+            });
+        }
+
+        // Select Actor and Load Movies
+        async function selectActor(actorId) {
+            selectedActorId = actorId;
+            
+            // Highlight selected actor
+            const cards = document.querySelectorAll('.actor-card');
+            cards.forEach(card => card.classList.remove('selected'));
+            event.currentTarget.classList.add('selected');
+
+            const loader = document.getElementById('actorLoader');
+            const actorMovies = document.getElementById('actorMovies');
+            const actorBanner = document.getElementById('actorBanner');
+            
+            loader.classList.add('active');
+            actorMovies.innerHTML = '';
+            actorBanner.classList.remove('active');
+
+            try {
+                const response = await fetch(`/actor_movies/${actorId}?limit=50`);
+                const data = await response.json();
+                loader.classList.remove('active');
+
+                if (data.error) {
+                    showError('actorError', data.error);
+                } else {
+                    displayActorDetails(data.actor);
+                    displayMovies(data.movies, 'actorMovies', true);
+                }
+            } catch (error) {
+                loader.classList.remove('active');
+                showError('actorError', 'An error occurred loading actor movies.');
+                console.error('Error:', error);
+            }
+        }
+
+        // Display Actor Details Banner
+        function displayActorDetails(actor) {
+            const banner = document.getElementById('actorBanner');
+            const bannerImage = document.getElementById('actorBannerImage');
+            const bannerName = document.getElementById('actorBannerName');
+            const bannerBio = document.getElementById('actorBannerBio');
+            const birthday = document.getElementById('actorBirthday');
+            const birthplace = document.getElementById('actorBirthplace');
+            const knownFor = document.getElementById('actorKnownFor');
+            
+            bannerImage.src = actor.profile_path || '';
+            bannerName.textContent = actor.name;
+            bannerBio.textContent = actor.biography ? actor.biography.substring(0, 300) + '...' : 'No biography available.';
+            birthday.textContent = actor.birthday;
+            birthplace.textContent = actor.place_of_birth;
+            knownFor.textContent = actor.known_for_department;
+            
+            banner.classList.add('active');
+            banner.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        // Display Movies
+        function displayMovies(movies, containerId, showCharacter = false) {
+            const resultsDiv = document.getElementById(containerId);
+            resultsDiv.innerHTML = '';
+
+            if (!movies || movies.length === 0) {
+                resultsDiv.innerHTML = '<div class="empty-state">No movies found</div>';
+                return;
+            }
+
+            movies.forEach(movie => {
+                const card = document.createElement('div');
+                card.className = 'movie-card';
+                
+                const posterHtml = movie.poster_path 
+                    ? `<img src="${movie.poster_path}" alt="${movie.title}" class="movie-poster" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                       <div class="movie-poster-placeholder" style="display:none;">🎬</div>`
+                    : `<div class="movie-poster-placeholder">🎬</div>`;
+                
+                const ratingHtml = movie.rating > 0 
+                    ? `<div class="movie-rating">⭐ ${movie.rating}</div>` 
+                    : '';
+                
+                const characterHtml = showCharacter && movie.character 
+                    ? `<div class="movie-character">as ${movie.character}</div>`
+                    : '';
+                
+                card.innerHTML = `
+                    ${posterHtml}
+                    <div class="movie-info">
+                        <h3>${movie.title}</h3>
+                        ${characterHtml}
+                        <div class="movie-meta">
+                            <div class="movie-year">${movie.year}</div>
+                            ${ratingHtml}
+                        </div>
+                    </div>
+                `;
+                resultsDiv.appendChild(card);
+            });
+        }
+
+        // Show Error Message
+        function showError(elementId, message) {
+            const errorMsg = document.getElementById(elementId);
+            errorMsg.textContent = message;
+            errorMsg.classList.add('active');
+            setTimeout(() => {
+                errorMsg.classList.remove('active');
+            }, 3000);
+        }
+
+        // Clear Results
+        function clearResults() {
+            document.getElementById('autoComplete').value = '';
+            document.getElementById('similarMovies').innerHTML = '';
+            document.getElementById('movieError').classList.remove('active');
+        }
+
+        function clearActorResults() {
+            document.getElementById('actorSearch').value = '';
+            document.getElementById('actorCards').innerHTML = '';
+            document.getElementById('actorMovies').innerHTML = '';
+            document.getElementById('actorError').classList.remove('active');
+            document.getElementById('actorSelection').classList.remove('active');
+            document.getElementById('actorBanner').classList.remove('active');
+            selectedActorId = null;
+        }
+    </script>
+</body>
+</html>
