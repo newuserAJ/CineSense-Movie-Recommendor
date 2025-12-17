@@ -8,16 +8,26 @@ import bs4 as bs
 import urllib.request
 import pickle
 import requests
+import os
 
-# Import API key from config file
+# Import API key from environment variables (preferred) or config file (fallback)
 try:
     from config import TMDB_API_KEY, TMDB_API_BASE_URL, TMDB_IMAGE_BASE_URL, TMDB_PROFILE_IMAGE_BASE_URL
 except ImportError:
-    print("Warning: config.py not found. Please create config.py with your TMDB_API_KEY")
-    TMDB_API_KEY = ""
+    print("Config file not found, using environment variables")
+    TMDB_API_KEY = os.environ.get('TMDB_API_KEY', '')
     TMDB_API_BASE_URL = "https://api.themoviedb.org/3"
     TMDB_IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w500"
     TMDB_PROFILE_IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w185"
+
+# Validate API key on startup
+if not TMDB_API_KEY:
+    print("=" * 70)
+    print("WARNING: TMDB_API_KEY is not configured!")
+    print("Please set the TMDB_API_KEY environment variable")
+    print("=" * 70)
+else:
+    print(f"TMDB API Key configured: {TMDB_API_KEY[:10]}...")
 
 # load the nlp model and tfidf vectorizer from disk
 filename = 'nlp_model.pkl'
@@ -59,7 +69,7 @@ def get_movie_poster(movie_title):
     Fetch movie poster and details from TMDB API
     Returns: dict with poster_path, year, rating, and overview
     """
-    if not TMDB_API_KEY or TMDB_API_KEY == "your_tmdb_api_key_here":
+    if not TMDB_API_KEY:
         print("ERROR: TMDB API key not configured")
         return None
     
@@ -94,7 +104,7 @@ def search_actor(actor_name):
     """
     Search for an actor and return their details
     """
-    if not TMDB_API_KEY or TMDB_API_KEY == "your_tmdb_api_key_here":
+    if not TMDB_API_KEY:
         print("ERROR: TMDB API key not configured")
         return None
     
@@ -144,7 +154,7 @@ def get_actor_movies(actor_id, limit=50):
     """
     Get top movies for a specific actor
     """
-    if not TMDB_API_KEY or TMDB_API_KEY == "your_tmdb_api_key_here":
+    if not TMDB_API_KEY:
         print("ERROR: TMDB API key not configured")
         return None
     
@@ -206,7 +216,7 @@ def get_actor_details(actor_id):
     """
     Get detailed information about an actor
     """
-    if not TMDB_API_KEY or TMDB_API_KEY == "your_tmdb_api_key_here":
+    if not TMDB_API_KEY:
         print("ERROR: TMDB API key not configured")
         return None
     
@@ -303,8 +313,8 @@ def search_actor_endpoint():
             return jsonify({'error': 'Please provide an actor name'}), 400
         
         # Check API key
-        if not TMDB_API_KEY or TMDB_API_KEY == "your_tmdb_api_key_here":
-            return jsonify({'error': 'TMDB API key not configured. Please add your API key to config.py'}), 500
+        if not TMDB_API_KEY:
+            return jsonify({'error': 'TMDB API key not configured. Please set TMDB_API_KEY environment variable.'}), 500
         
         actors = search_actor(actor_name)
         if actors:
@@ -326,8 +336,8 @@ def actor_movies_endpoint(actor_id):
         print(f"Received request for actor ID {actor_id} movies")
         
         # Check API key
-        if not TMDB_API_KEY or TMDB_API_KEY == "your_tmdb_api_key_here":
-            return jsonify({'error': 'TMDB API key not configured. Please add your API key to config.py'}), 500
+        if not TMDB_API_KEY:
+            return jsonify({'error': 'TMDB API key not configured. Please set TMDB_API_KEY environment variable.'}), 500
         
         # Get actor details
         actor_details = get_actor_details(actor_id)
